@@ -28,7 +28,7 @@
           </ul>
           <!-- / nav -->
           <ul class="h-r-login">
-            <li id="no-login">
+            <li v-if="!loginInfo.id" id="no-login">
               <a href="/login" title="登录">
                 <em class="icon18 login-icon">&nbsp;</em>
                 <span class="vam ml5">登录</span>
@@ -44,18 +44,18 @@
               </a>
               <q class="red-point" style="display: none">&nbsp;</q>
             </li>
-            <li id="is-login-two" class="h-r-user undis">
+            <li v-if="loginInfo.id" id="is-login-two" class="h-r-user">
               <a href="#" title>
                 <img
-                  src="~/assets/img/avatar-boy.gif"
+                  :src="loginInfo.avatar"
                   width="30"
                   height="30"
                   class="vam picImg"
                   alt
                 >
-                <span id="userName" class="vam disIb"/>
+                <span id="userName" class="vam disIb" style="max-width:100%">{{ loginInfo.nickname }}</span>
               </a>
-              <a href="javascript:void(0)" title="退出" onclick="exit();" class="ml5">退出</a>
+              <a href="/" title="退出" class="ml5">退出</a>
             </li>
             <!-- /未登录显示第1 li；登录后显示第2，3 li -->
           </ul>
@@ -136,6 +136,33 @@ import '~/assets/css/reset.css'
 import '~/assets/css/theme.css'
 import '~/assets/css/global.css'
 import '~/assets/css/web.css'
+import wx from '@/api/ucenter/wx'
 
-export default {}
+export default {
+  data() {
+    return {
+      jwtToken: '',
+      loginInfo: {}
+    }
+  },
+  created() {
+    // 从url中获取jwtToken
+    this.jwtToken = this.$route.query.token
+    if (this.jwtToken) {
+      this.showInfo()
+    }
+  },
+  methods: {
+    showInfo() {
+      wx.parseJwt(this.jwtToken).then(response => {
+        const loginInfo = response.data.data.loginInfo
+        if (loginInfo) {
+          this.loginInfo = loginInfo
+        } else {
+          this.$router.push({ path: '/' })
+        }
+      })
+    }
+  }
+}
 </script>
